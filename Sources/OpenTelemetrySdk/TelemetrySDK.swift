@@ -32,12 +32,30 @@ public class TelemetrySDK : NSObject {
         OpenTelemetrySDK.instance.tracerProvider.addSpanProcessor(SimpleSpanProcessor(spanExporter: BridgeSpanExporter(exporter: spanExporter)))
     }
     
+    @objc
+    public func activeSpan() -> TelemetrySpan? {
+        let span: Span? = OpenTelemetrySDK.instance.contextProvider.activeSpan;
+        if span != nil {
+            return TelemetrySpan(span: span!)
+        } else {
+            return nil
+        }
+    }
+    
+    @objc
+    public func setActiveSpan(_ span: TelemetrySpan) {
+        OpenTelemetrySDK.instance.contextProvider.setActiveSpan(span.span)
+    }
+    
+    @objc
+    public func removeContextForSpan(_ span: TelemetrySpan) {
+        OpenTelemetrySDK.instance.contextProvider.removeContextForSpan(span.span);
+    }
     
     @objc
     public func test(tst: String) {
         print("test" + tst)
     }
-    
 }
 
 @objc
@@ -68,7 +86,7 @@ public class TelemetrySpanBuilder: NSObject {
     
     @objc
     public func setParent(_ parent: TelemetrySpan) -> Self {
-        self.spanBuilder.setParent(parent.getSpan())
+        self.spanBuilder.setParent(parent.span)
         return self
     }
     
@@ -143,15 +161,32 @@ public class TelemetrySpanBuilder: NSObject {
 }
 
 @objc
+@objcMembers
 public class TelemetrySpan: NSObject {
-    private var span: Span
+    fileprivate var span: Span
     
     public init(span: Span) {
         self.span = span
     }
     
-    fileprivate func getSpan() -> Span {
-        return span
+    public var kind: TelemetrySpanKind {
+        return TelemetrySpanKind(span.kind)
+    }
+    
+    public var context: TelemetrySpanContext {
+        return TelemetrySpanContext(spanContext: span.context)
+    }
+    
+    public var isRecording: Bool {
+        return span.isRecording
+    }
+    
+    public var status: TelemetryStatus {
+        return TelemetryStatus(span.status)
+    }
+    
+    public var name: String {
+        return span.name
     }
     
     @objc
@@ -165,8 +200,28 @@ public class TelemetrySpan: NSObject {
     }
     
     @objc
+    public func addEvent(name: String, timestamp: NSDate) {
+        span.addEvent(name: name, timestamp: Date(timeIntervalSince1970: timestamp.timeIntervalSince1970))
+    }
+    
+    @objc
+    public func addEvent(name: String, attributes: [String: TelemetryAttributeValue], timestamp: NSDate) {
+        var attr: [String: AttributeValue] = [String: AttributeValue]()
+        for kv in attributes {
+            attr.updateValue(kv.value.getAttribute(), forKey: kv.key)
+        }
+        
+        span.addEvent(name: name, attributes: attr, timestamp: Date(timeIntervalSince1970: timestamp.timeIntervalSince1970))
+    }
+    
+    @objc
     public func end() {
         span.end()
+    }
+    
+    @objc
+    public func end(time: NSDate) {
+        span.end(time: Date(timeIntervalSince1970: time.timeIntervalSince1970))
     }
     
 }
@@ -192,8 +247,6 @@ public class TelemetrySpanContext: NSObject {
     public var isRemote: Bool {
         return spanContext.isRemote
     }
-    
-    
     
 }
 
@@ -251,9 +304,29 @@ public class TelemetryAttributeValue: NSObject {
 public class TelemetrySpanKind: NSObject {
     fileprivate var kind: SpanKind
 
-    public var name: String
+    public var INTERNAL: TelemetrySpanKind {
+        return TelemetrySpanKind(SpanKind.internal)
+    }
     
-    public init(_ kind: SpanKind) {
+    public var SERVER: TelemetrySpanKind {
+        return TelemetrySpanKind(SpanKind.server)
+    }
+    
+    public var CLIENT: TelemetrySpanKind {
+        return TelemetrySpanKind(SpanKind.client)
+    }
+    
+    public var PRODUCER: TelemetrySpanKind {
+        return TelemetrySpanKind(SpanKind.producer)
+    }
+    
+    public var CONSUMER: TelemetrySpanKind {
+        return TelemetrySpanKind(SpanKind.consumer)
+    }
+    
+    fileprivate var name: String
+    
+    fileprivate init(_ kind: SpanKind) {
         self.kind = kind
 
         switch kind {
@@ -270,8 +343,7 @@ public class TelemetrySpanKind: NSObject {
         }
     }
 
-    @objc
-    public convenience init(_ name: String) {
+    fileprivate convenience init(_ name: String) {
         switch name {
         case "internal":
             self.init(.internal)
@@ -294,9 +366,21 @@ public class TelemetrySpanKind: NSObject {
 @objcMembers
 public class TelemetryStatus: NSObject {
     private var status: Status
-    public var name: String
+    fileprivate var name: String
     
-    public init(_ status: Status) {
+    public var OK: TelemetryStatus {
+        return TelemetryStatus(.ok)
+    }
+    
+    public var ERROR: TelemetryStatus {
+        return TelemetryStatus(.error(description: "error"))
+    }
+    
+    public var UNSET: TelemetryStatus {
+        return TelemetryStatus(.unset)
+    }
+    
+    fileprivate init(_ status: Status) {
         self.status = status
         
         switch status {
@@ -309,7 +393,7 @@ public class TelemetryStatus: NSObject {
         }
     }
     
-    public convenience init(_ name: String) {
+    fileprivate convenience init(_ name: String) {
         switch name {
         case "ok":
             self.init(.ok)
@@ -363,13 +447,15 @@ public class TelemetrySpanData: NSObject {
     
     // traceState
     
-    public var resource: TelemetryResource {
-        return TelemetryResource(resource: spanData.resource)
-    }
-    
     public var parentSpanId: String? {
         return spanData.parentSpanId?.hexString;
     }
+    
+    public var resource: TelemetryResource {
+        return TelemetryResource(resource: spanData.resource)
+    }
+
+    // instrumentationLibraryInfo
     
     public var name: String {
         return spanData.name;
@@ -403,6 +489,14 @@ public class TelemetrySpanData: NSObject {
     }
     
     // links
+    public var links: [TelemetryLink] {
+        var links: [TelemetryLink] = [TelemetryLink]()
+        
+        for kv in spanData.links {
+            links.append(TelemetryLink(kv))
+        }
+        return links
+    }
     
     public var status: TelemetryStatus {
         return TelemetryStatus(spanData.status)
@@ -432,6 +526,29 @@ public class TelemetrySpanData: NSObject {
         return spanData.totalAttributeCount
     }
     
+}
+
+@objc
+@objcMembers
+public class TelemetryLink: NSObject {
+    private var link: SpanData.Link
+    
+    public var context: TelemetrySpanContext {
+        return TelemetrySpanContext(spanContext: link.context)
+    }
+    
+    public var attributes: [String: TelemetryAttributeValue] {
+        var attr: [String: TelemetryAttributeValue] = [String: TelemetryAttributeValue]()
+        for kv in link.attributes {
+            attr.updateValue(TelemetryAttributeValue(attribute: kv.value), forKey: kv.key)
+        }
+        
+        return attr
+    }
+    
+    fileprivate init(_ link: SpanData.Link) {
+        self.link = link
+    }
 }
 
 @objc
@@ -580,5 +697,3 @@ public class BridgeSpanExporter: NSObject, SpanExporter, TelemetrySpanExporter {
         self.exporter.shudownTelemetrySpan()
     }
 }
-
-
