@@ -79,7 +79,7 @@ public class TelemetrySpanBuilder: NSObject {
     private var telemetrySpan: TelemetrySpan?
     private var tracer: Tracer
     
-    public init(tracer: Tracer, spanBuilder: SpanBuilder) {
+    fileprivate init(tracer: Tracer, spanBuilder: SpanBuilder) {
         self.tracer = tracer
         self.spanBuilder = spanBuilder
     }
@@ -137,7 +137,7 @@ public class TelemetrySpanBuilder: NSObject {
     
     @objc
     public func setAttribute(key: String, attributeValue: TelemetryAttributeValue) -> Self {
-        spanBuilder.setAttribute(key: key, value: attributeValue.getAttribute())
+        spanBuilder.setAttribute(key: key, value: attributeValue.attribute)
         return self
     }
     
@@ -147,6 +147,7 @@ public class TelemetrySpanBuilder: NSObject {
         return self
     }
     
+    @objc
     public func setStartTime(time: NSDate) -> Self {
         spanBuilder.setStartTime(time: Date(timeIntervalSince1970: time.timeIntervalSince1970))
         return self
@@ -157,7 +158,6 @@ public class TelemetrySpanBuilder: NSObject {
         let span = spanBuilder.startSpan()
         return TelemetrySpan(span: span)
     }
-    
 }
 
 @objc
@@ -165,7 +165,7 @@ public class TelemetrySpanBuilder: NSObject {
 public class TelemetrySpan: NSObject {
     fileprivate var span: Span
     
-    public init(span: Span) {
+    fileprivate init(span: Span) {
         self.span = span
     }
     
@@ -191,7 +191,7 @@ public class TelemetrySpan: NSObject {
     
     @objc
     public func setAttribute(key: String, value: TelemetryAttributeValue?) {
-        span.setAttribute(key: key, value: value?.getAttribute())
+        span.setAttribute(key: key, value: value?.attribute)
     }
     
     @objc
@@ -208,7 +208,7 @@ public class TelemetrySpan: NSObject {
     public func addEvent(name: String, attributes: [String: TelemetryAttributeValue], timestamp: NSDate) {
         var attr: [String: AttributeValue] = [String: AttributeValue]()
         for kv in attributes {
-            attr.updateValue(kv.value.getAttribute(), forKey: kv.key)
+            attr.updateValue(kv.value.attribute, forKey: kv.key)
         }
         
         span.addEvent(name: name, attributes: attr, timestamp: Date(timeIntervalSince1970: timestamp.timeIntervalSince1970))
@@ -223,7 +223,6 @@ public class TelemetrySpan: NSObject {
     public func end(time: NSDate) {
         span.end(time: Date(timeIntervalSince1970: time.timeIntervalSince1970))
     }
-    
 }
 
 
@@ -247,13 +246,12 @@ public class TelemetrySpanContext: NSObject {
     public var isRemote: Bool {
         return spanContext.isRemote
     }
-    
 }
 
 @objc
 @objcMembers
 public class TelemetryAttributeValue: NSObject {
-    private var attribute: AttributeValue
+    fileprivate var attribute: AttributeValue
     
     public var value: String
     
@@ -292,11 +290,6 @@ public class TelemetryAttributeValue: NSObject {
     public convenience init(doubleValue: Double) {
         self.init(attribute: AttributeValue.double(doubleValue))
     }
-    
-    fileprivate func getAttribute() -> AttributeValue {
-        return self.attribute
-    }
-    
 }
 
 @objc
@@ -304,27 +297,27 @@ public class TelemetryAttributeValue: NSObject {
 public class TelemetrySpanKind: NSObject {
     fileprivate var kind: SpanKind
 
-    public var INTERNAL: TelemetrySpanKind {
+    public static var INTERNAL: TelemetrySpanKind {
         return TelemetrySpanKind(SpanKind.internal)
     }
     
-    public var SERVER: TelemetrySpanKind {
+    public static  var SERVER: TelemetrySpanKind {
         return TelemetrySpanKind(SpanKind.server)
     }
     
-    public var CLIENT: TelemetrySpanKind {
+    public static var CLIENT: TelemetrySpanKind {
         return TelemetrySpanKind(SpanKind.client)
     }
     
-    public var PRODUCER: TelemetrySpanKind {
+    public static var PRODUCER: TelemetrySpanKind {
         return TelemetrySpanKind(SpanKind.producer)
     }
     
-    public var CONSUMER: TelemetrySpanKind {
+    public static var CONSUMER: TelemetrySpanKind {
         return TelemetrySpanKind(SpanKind.consumer)
     }
     
-    fileprivate var name: String
+    public var name: String
     
     fileprivate init(_ kind: SpanKind) {
         self.kind = kind
@@ -366,17 +359,17 @@ public class TelemetrySpanKind: NSObject {
 @objcMembers
 public class TelemetryStatus: NSObject {
     private var status: Status
-    fileprivate var name: String
+    public var name: String
     
-    public var OK: TelemetryStatus {
+    public static var OK: TelemetryStatus {
         return TelemetryStatus(.ok)
     }
     
-    public var ERROR: TelemetryStatus {
+    public static var ERROR: TelemetryStatus {
         return TelemetryStatus(.error(description: "error"))
     }
     
-    public var UNSET: TelemetryStatus {
+    public static var UNSET: TelemetryStatus {
         return TelemetryStatus(.unset)
     }
     
@@ -403,7 +396,6 @@ public class TelemetryStatus: NSObject {
             self.init(.unset)
         }
     }
-    
 }
 
 @objc
@@ -488,7 +480,6 @@ public class TelemetrySpanData: NSObject {
         return evts
     }
     
-    // links
     public var links: [TelemetryLink] {
         var links: [TelemetryLink] = [TelemetryLink]()
         
@@ -607,7 +598,7 @@ public class TelemetryResource: NSObject {
     public convenience init(attributes: [String: TelemetryAttributeValue]) {
         var attr: [String: AttributeValue] = [String: AttributeValue]()
         for kv in attributes {
-            attr.updateValue(kv.value.getAttribute(), forKey: kv.key)
+            attr.updateValue(kv.value.attribute, forKey: kv.key)
         }
         
         self.init(resource: Resource(attributes: attr))
@@ -631,9 +622,18 @@ public class TelemetryResource: NSObject {
 
 
 @objc
+@objcMembers
 public class TelemetrySpanExporterResultCode: NSObject {
     fileprivate var resultCode: SpanExporterResultCode
     public var code: String
+    
+    public static var SUCCESS: TelemetrySpanExporterResultCode {
+        return TelemetrySpanExporterResultCode(resultCode: SpanExporterResultCode.success)
+    }
+    
+    public static var FAILURE: TelemetrySpanExporterResultCode {
+        return TelemetrySpanExporterResultCode(resultCode: SpanExporterResultCode.failure)
+    }
     
     public init(resultCode: SpanExporterResultCode) {
         self.resultCode = resultCode
@@ -652,8 +652,6 @@ public class TelemetrySpanExporterResultCode: NSObject {
             self.init(resultCode: .failure)
         }
     }
-    
-    
 }
 
 public class BridgeSpanExporter: NSObject, SpanExporter, TelemetrySpanExporter {
