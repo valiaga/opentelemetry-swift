@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name             = "OpenTelemetrySdk"
-  spec.version          = '0.0.1'
+  spec.version          = '0.0.2'
   spec.summary          = 'aliyun log service ios producer.'
 
   # This description is used to generate tags and improve search results.
@@ -45,7 +45,7 @@ Pod::Spec.new do |spec|
   spec.libraries = 'z'
   spec.source_files = 'Sources/OpenTelemetrySdk/**/*.{swift}'
   
-  spec.dependency "OpenTelemetryApi", "0.0.1"
+  spec.dependency "OpenTelemetryApi", "0.0.2"
   
 #  spec.subspec 'Api' do |a|
 #      a.source_files = 'Sources/OpenTelemetryApi/**/*.{swift}'
