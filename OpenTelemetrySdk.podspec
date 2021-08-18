@@ -15,8 +15,8 @@ Pod::Spec.new do |spec|
   #  summary should be tweet-length, and the description more in depth.
   #
 
-  spec.name             = "TelemetrySdk"
-  spec.version          = '0.1.beta.1'
+  spec.name             = "OpenTelemetrySdk"
+  spec.version          = '0.1.alpha.1'
   spec.summary          = 'aliyun log service ios producer.'
 
   # This description is used to generate tags and improve search results.
@@ -38,16 +38,21 @@ Pod::Spec.new do |spec|
   # spec.screenshots  = "www.example.com/screenshots_1.gif", "www.example.com/screenshots_2.gif"
   
   spec.ios.deployment_target = '10.0'
-  spec.default_subspec = 'Api'
+#  spec.default_subspec = 'Api'
   spec.swift_versions = '5.2'
 
   spec.requires_arc  = true
   spec.libraries = 'z'
+  spec.source_files = 'Sources/OpenTelemetrySdk/**/*.{swift}'
   
-  spec.subspec 'Api' do |a|
-      a.source_files = 'Sources/OpenTelemetryApi/**/*.{swift}'
-  end
-
+#  spec.subspec 'Api' do |a|
+#      a.source_files = 'Sources/OpenTelemetryApi/**/*.{swift}'
+#  end
+#
+#  spec.subspec 'Sdk' do |s|
+#      s.dependency 'TelemetrySdk/Api'
+#      s.source_files = 'Sources/OpenTelemetrySdk/**/*.{swift}'
+#  end
 
   # ―――  Spec License  ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
