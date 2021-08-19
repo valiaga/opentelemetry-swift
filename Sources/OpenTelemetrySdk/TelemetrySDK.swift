@@ -7,6 +7,7 @@
 
 import Foundation
 import OpenTelemetryApi
+import os.activity
 
 @objc
 @objcMembers
@@ -17,6 +18,11 @@ public class TelemetrySDK : NSObject {
     private var _downgradeActiveSpan: TelemetrySpan?
     
     private override init() {
+    }
+    
+    @objc
+    public var activityIdent: os_activity_id_t {
+        return OpenTelemetrySDK.instance.contextProvider.getActivityIdent()
     }
     
     @objc
@@ -39,7 +45,7 @@ public class TelemetrySDK : NSObject {
     
     @objc
     public func activeSpan() -> TelemetrySpan? {
-        let span: Span? = OpenTelemetrySDK.instance.contextProvider.activeSpan;
+        let span: Span? = OpenTelemetrySDK.instance.contextProvider.activeSpan
         if span != nil {
             return TelemetrySpan(span: span!)
         } else {

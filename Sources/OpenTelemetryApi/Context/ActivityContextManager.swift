@@ -33,6 +33,11 @@ class ActivityContextManager: ContextManager {
     var objectScope = NSMapTable<AnyObject, ScopeElement>(keyOptions: .weakMemory, valueOptions: .strongMemory)
 
     var contextMap = [os_activity_id_t: [String: AnyObject]]()
+    
+    func getActivityIdent() -> os_activity_id_t {
+        var parentIdent: os_activity_id_t = 0
+        return os_activity_get_identifier(OS_ACTIVITY_CURRENT, &parentIdent)
+    }
 
     func getCurrentContextValue(forKey key: String) -> AnyObject? {
         var parentIdent: os_activity_id_t = 0

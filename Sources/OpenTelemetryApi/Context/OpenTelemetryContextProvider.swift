@@ -47,4 +47,8 @@ public struct OpenTelemetryContextProvider {
     public func removeContextForBaggage(_ baggage: Baggage) {
         contextManager.removeContextValue(forKey: OpenTelemetryContextKeys.baggage, value: baggage)
     }
+    
+    public func getActivityIdent() -> os_activity_id_t {
+        return contextManager.getActivityIdent()
+    }
 }
