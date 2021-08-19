@@ -27,7 +27,7 @@ class SLSActivityContextManager: ContextManager {
     }
     
     func removeContextValue(forKey: String, value: AnyObject) {
-        
+        self.span = nil
     }
     
     func getActivityIdent() -> os_activity_id_t {
