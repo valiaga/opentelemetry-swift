@@ -14,6 +14,11 @@ public class TelemetrySDK : NSObject {
     
     public static var instance = TelemetrySDK()
     
+    private var _downgradeActiveSpan: TelemetrySpan?
+    
+    private override init() {
+    }
+    
     @objc
     public func getTracer(_ instrumentationName: String) -> TelemetryTracer {
         let resource: Resource = OpenTelemetrySDK.instance.tracerProvider.getActiveResource();
@@ -45,6 +50,16 @@ public class TelemetrySDK : NSObject {
     @objc
     public func setActiveSpan(_ span: TelemetrySpan) {
         OpenTelemetrySDK.instance.contextProvider.setActiveSpan(span.span)
+    }
+    
+    @objc
+    public func downgradeActiveSpan() -> TelemetrySpan? {
+        return self._downgradeActiveSpan
+    }
+    
+    @objc
+    public func setDowngradeActiveSpan(_ span: TelemetrySpan) {
+        self._downgradeActiveSpan = span
     }
     
     @objc
