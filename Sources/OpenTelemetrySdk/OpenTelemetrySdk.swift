@@ -37,6 +37,6 @@ public struct OpenTelemetrySDK {
         OpenTelemetry.registerTracerProvider(tracerProvider: TracerProviderSdk())
         OpenTelemetry.registerMeterProvider(meterProvider: MeterProviderSdk())
         OpenTelemetry.registerBaggageManager(baggageManager: DefaultBaggageManager.instance)
-        OpenTelemetry.registerContextManager(contextManager: SLSActivityContextManager.instance)
+//        OpenTelemetry.registerContextManager(contextManager: SLSActivityContextManager.instance)
     }
 }
