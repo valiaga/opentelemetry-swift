@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name             = "TelemetrySdk"
-  spec.version          = '0.1.beta.2'
+  spec.version          = '0.1.beta.3'
   spec.summary          = 'aliyun log service ios producer.'
 
   # This description is used to generate tags and improve search results.
