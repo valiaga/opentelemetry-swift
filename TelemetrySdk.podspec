@@ -45,7 +45,7 @@ Pod::Spec.new do |spec|
   spec.libraries = 'z'
   
   spec.subspec 'Api' do |a| 
-      a.source_files = '' [ 'Sources/OpenTelemetryApi/**/*.{swift}', 'Sources/OpenTelemetrySdk/**/*.{swift}' ]
+      a.source_files = [ 'Sources/OpenTelemetryApi/**/*.{swift}', 'Sources/OpenTelemetrySdk/**/*.{swift}' ]
   end
 
 
