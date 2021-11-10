@@ -47,6 +47,9 @@ Pod::Spec.new do |spec|
   spec.subspec 'Api' do |a|
       a.source_files = 'Sources/OpenTelemetryApi/**/*.{swift}'
   end
+  spec.subspec 'SDK' do |a|
+    a.source_files = 'Sources/OpenTelemetrySdk/**/*.{swift}'
+end
 
 
   # ―――  Spec License  ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
