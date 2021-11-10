@@ -44,11 +44,8 @@ Pod::Spec.new do |spec|
   spec.requires_arc  = true
   spec.libraries = 'z'
   
-  spec.subspec 'Api' do |a|
-      a.source_files = 'Sources/OpenTelemetryApi/**/*.{swift}'
-  end
-  spec.subspec 'Sdk' do |a|
-    a.source_files = 'Sources/OpenTelemetrySdk/**/*.{swift}'
+  spec.subspec 'Api' do |a| 
+      a.source_files = '' [ 'Sources/OpenTelemetryApi/**/*.{swift}', 'Sources/OpenTelemetrySdk/**/*.{swift}' ]
   end
 
 
