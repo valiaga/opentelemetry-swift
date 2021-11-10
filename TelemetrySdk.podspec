@@ -38,7 +38,7 @@ Pod::Spec.new do |spec|
   # spec.screenshots  = "www.example.com/screenshots_1.gif", "www.example.com/screenshots_2.gif"
   
   spec.ios.deployment_target = '10.0'
-  spec.default_subspec = 'Sources'
+  # spec.default_subspec = 'Sources'
   spec.swift_versions = '5.2'
 
   spec.requires_arc  = true
